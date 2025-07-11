@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,56 @@ import { calculateStoichiometry } from '@/utils/chemistryCalculations';
 
 const StoichiometryCalculator = () => {
   const [equation, setEquation] = useState('');
+  const [reactants, setReactants] = useState<string[]>([]);
   const [reactantMasses, setReactantMasses] = useState<{[key: string]: number}>({});
   const [result, setResult] = useState<any>(null);
+
+  // Parse equation to extract reactants
+  useEffect(() => {
+    if (equation.trim()) {
+      const parsedReactants = parseReactants(equation);
+      setReactants(parsedReactants);
+      // Reset masses when equation changes
+      setReactantMasses({});
+      setResult(null);
+    } else {
+      setReactants([]);
+      setReactantMasses({});
+      setResult(null);
+    }
+  }, [equation]);
+
+  const parseReactants = (equation: string): string[] => {
+    try {
+      // Split by arrow symbols (→ or ->)
+      const parts = equation.split(/→|->|\s*=\s*/);
+      if (parts.length < 2) return [];
+      
+      const reactantSide = parts[0].trim();
+      
+      // Split by + and clean up
+      const reactantList = reactantSide
+        .split('+')
+        .map(reactant => {
+          // Remove coefficients and spaces
+          return reactant.trim().replace(/^\d+\s*/, '');
+        })
+        .filter(reactant => reactant.length > 0);
+      
+      return [...new Set(reactantList)]; // Remove duplicates
+    } catch (error) {
+      console.log('Error parsing equation:', error);
+      return [];
+    }
+  };
+
+  const formatCompoundForDisplay = (compound: string): string => {
+    // Convert simple subscripts for display (H2 -> H₂, O2 -> O₂, etc.)
+    return compound.replace(/(\d+)/g, (match) => {
+      const subscripts = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+      return match.split('').map(digit => subscripts[parseInt(digit)]).join('');
+    });
+  };
 
   const handleCalculate = () => {
     const stoichResult = calculateStoichiometry(equation, reactantMasses);
@@ -68,29 +116,24 @@ const StoichiometryCalculator = () => {
             />
           </div>
 
-          {equation && (
+          {reactants.length > 0 && (
             <div className="space-y-3">
               <Label className="text-blue-900">Enter masses of reactants (in grams):</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* This would be dynamically generated based on parsed equation */}
-                <div>
-                  <Label className="text-sm text-blue-800">H₂ (g)</Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    onChange={(e) => handleMassChange('H2', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm text-blue-800">O₂ (g)</Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    onChange={(e) => handleMassChange('O2', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
+                {reactants.map((reactant) => (
+                  <div key={reactant}>
+                    <Label className="text-sm text-blue-800">
+                      {formatCompoundForDisplay(reactant)} (g)
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={reactantMasses[reactant] || ''}
+                      onChange={(e) => handleMassChange(reactant, e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -98,7 +141,7 @@ const StoichiometryCalculator = () => {
           <Button 
             onClick={handleCalculate}
             className="w-full bg-blue-600 hover:bg-blue-700"
-            disabled={!equation.trim()}
+            disabled={!equation.trim() || reactants.length === 0}
           >
             Calculate Stoichiometry
           </Button>
@@ -115,7 +158,7 @@ const StoichiometryCalculator = () => {
                     <div className="bg-white p-3 rounded border mt-1">
                       {Object.entries(result.moles || {}).map(([compound, moles]) => (
                         <p key={compound} className="font-mono text-sm">
-                          {compound}: {formatValue(moles)} mol
+                          {formatCompoundForDisplay(compound)}: {formatValue(moles)} mol
                         </p>
                       ))}
                     </div>
@@ -125,7 +168,7 @@ const StoichiometryCalculator = () => {
                     <div>
                       <p className="font-semibold text-blue-800">Limiting Reagent:</p>
                       <p className="bg-red-50 text-red-800 p-2 rounded border font-mono">
-                        {result.limitingReagent}
+                        {formatCompoundForDisplay(result.limitingReagent)}
                       </p>
                     </div>
                   )}
@@ -136,7 +179,7 @@ const StoichiometryCalculator = () => {
                       <div className="bg-white p-3 rounded border mt-1">
                         {Object.entries(result.products).map(([product, amount]) => (
                           <p key={product} className="font-mono text-sm">
-                            {product}: {formatProductValue(amount)} g
+                            {formatCompoundForDisplay(product)}: {formatProductValue(amount)} g
                           </p>
                         ))}
                       </div>
@@ -151,8 +194,9 @@ const StoichiometryCalculator = () => {
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">How to use:</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
-            <li>Enter a balanced chemical equation</li>
-            <li>Input the masses of reactants in grams</li>
+            <li>Enter a balanced chemical equation (use → or -> for the arrow)</li>
+            <li>Input fields will appear automatically for each reactant</li>
+            <li>Enter the masses of reactants in grams</li>
             <li>Click calculate to see moles, limiting reagent, and product amounts</li>
           </ol>
         </div>
