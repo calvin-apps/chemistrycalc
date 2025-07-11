@@ -91,7 +91,7 @@ const Index = () => {
         <div className="text-center mt-16 text-blue-300">
           <p className="text-sm">
             Built for chemistry students and professionals • Always verify critical calculations
-          </p>
+         .By Mafole Makhetha </p>
         </div>
       </div>
     </div>
