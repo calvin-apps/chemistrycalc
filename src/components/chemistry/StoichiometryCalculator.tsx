@@ -194,7 +194,7 @@ const StoichiometryCalculator = () => {
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">How to use:</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
-            <li>Enter a balanced chemical equation (use → or -> for the arrow)</li>
+            <li>Enter a balanced chemical equation (use → or -&gt; for the arrow)</li>
             <li>Input fields will appear automatically for each reactant</li>
             <li>Enter the masses of reactants in grams</li>
             <li>Click calculate to see moles, limiting reagent, and product amounts</li>
