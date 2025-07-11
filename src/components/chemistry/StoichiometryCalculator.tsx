@@ -25,6 +25,26 @@ const StoichiometryCalculator = () => {
     }));
   };
 
+  const formatValue = (value: unknown): string => {
+    if (typeof value === 'number') {
+      return value.toFixed(4);
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return String(value);
+  };
+
+  const formatProductValue = (value: unknown): string => {
+    if (typeof value === 'number') {
+      return value.toFixed(2);
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return String(value);
+  };
+
   return (
     <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
       <CardHeader>
@@ -95,7 +115,7 @@ const StoichiometryCalculator = () => {
                     <div className="bg-white p-3 rounded border mt-1">
                       {Object.entries(result.moles || {}).map(([compound, moles]) => (
                         <p key={compound} className="font-mono text-sm">
-                          {compound}: {typeof moles === 'number' ? moles.toFixed(4) : moles} mol
+                          {compound}: {formatValue(moles)} mol
                         </p>
                       ))}
                     </div>
@@ -116,7 +136,7 @@ const StoichiometryCalculator = () => {
                       <div className="bg-white p-3 rounded border mt-1">
                         {Object.entries(result.products).map(([product, amount]) => (
                           <p key={product} className="font-mono text-sm">
-                            {product}: {typeof amount === 'number' ? amount.toFixed(2) : amount} g
+                            {product}: {formatProductValue(amount)} g
                           </p>
                         ))}
                       </div>
