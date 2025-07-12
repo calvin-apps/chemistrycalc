@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Scale, CheckCircle, AlertTriangle } from 'lucide-react';
 import { balanceEquation } from '@/utils/chemistryCalculations';
+import ChemicalSymbolInserter from './ChemicalSymbolInserter';
 
 const EquationBalancer = () => {
   const [equation, setEquation] = useState('');
@@ -21,6 +22,10 @@ const EquationBalancer = () => {
       setError('Unable to balance equation. Please check your input format.');
       setResult(null);
     }
+  };
+
+  const insertSymbol = (symbol: string) => {
+    setEquation(prev => prev + symbol);
   };
 
   const examples = [
@@ -44,14 +49,17 @@ const EquationBalancer = () => {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-blue-900 mb-2">
-              Chemical Equation (use → or = for reaction arrow)
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-blue-900">
+                Chemical Equation (use → or = for reaction arrow)
+              </label>
+              <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+            </div>
             <Input
               value={equation}
               onChange={(e) => setEquation(e.target.value)}
               placeholder="e.g., H2 + O2 → H2O"
-              className="text-lg"
+              className="text-lg font-mono"
             />
           </div>
           
