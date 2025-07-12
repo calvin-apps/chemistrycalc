@@ -62,40 +62,52 @@ const ChemicalSymbolInserter: React.FC<ChemicalSymbolInserterProps> = ({ onSymbo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="text-blue-600 border-blue-300 hover:bg-blue-50">
-          <Plus className="w-4 h-4 mr-1" />
-          Insert Symbols
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 shadow-sm transition-all duration-200 font-medium min-w-fit whitespace-nowrap"
+        >
+          <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="hidden sm:inline">Insert Symbols</span>
+          <span className="sm:hidden">Symbols</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 max-h-96 overflow-y-auto">
+      <PopoverContent 
+        className="w-80 sm:w-96 max-h-96 overflow-y-auto bg-white border border-gray-200 shadow-lg z-50" 
+        align="start"
+        side="bottom"
+        sideOffset={8}
+      >
         <div className="space-y-4">
-          <h3 className="font-semibold text-blue-900">Chemical Symbols & Formulas</h3>
+          <div className="sticky top-0 bg-white pb-2 border-b border-gray-100">
+            <h3 className="font-semibold text-blue-900 text-sm sm:text-base">Chemical Symbols & Formulas</h3>
+          </div>
           
           {Object.entries(symbols).map(([category, symbolList]) => (
             <div key={category} className="space-y-2">
-              <h4 className="text-sm font-medium text-blue-800">{category}</h4>
-              <div className="grid grid-cols-2 gap-2">
+              <h4 className="text-xs sm:text-sm font-medium text-blue-800 bg-blue-50 px-2 py-1 rounded-md">{category}</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                 {symbolList.map((item, index) => (
                   <button
                     key={index}
                     onClick={() => onSymbolInsert(item.symbol)}
-                    className="flex flex-col items-start p-2 text-left bg-gray-50 hover:bg-blue-50 rounded border transition-colors"
+                    className="flex flex-col items-start p-2 text-left bg-gray-50 hover:bg-blue-50 rounded border transition-colors duration-150 group min-h-[60px] sm:min-h-[65px]"
                     title={item.description}
                   >
-                    <div className="flex items-center gap-2 w-full">
-                      <Badge variant="outline" className="font-mono text-lg px-2 py-1">
+                    <div className="flex items-center gap-2 w-full mb-1">
+                      <Badge variant="outline" className="font-mono text-sm sm:text-base px-2 py-1 bg-white group-hover:bg-blue-100 transition-colors">
                         {item.symbol}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">{item.name}</p>
+                    <p className="text-xs text-gray-600 leading-tight">{item.name}</p>
                   </button>
                 ))}
               </div>
             </div>
           ))}
           
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-700">
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <p className="text-xs text-blue-700 leading-relaxed">
               <strong>Tip:</strong> Click any symbol to insert it at your cursor position in the equation input field.
             </p>
           </div>
