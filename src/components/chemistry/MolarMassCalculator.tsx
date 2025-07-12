@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Atom, CheckCircle } from 'lucide-react';
 import { calculateMolarMass } from '@/utils/chemistryCalculations';
+import ChemicalSymbolInserter from './ChemicalSymbolInserter';
 
 const MolarMassCalculator = () => {
   const [formula, setFormula] = useState('');
@@ -21,6 +22,10 @@ const MolarMassCalculator = () => {
       setError('Invalid chemical formula. Please check your input.');
       setResult(null);
     }
+  };
+
+  const insertSymbol = (symbol: string) => {
+    setFormula(prev => prev + symbol);
   };
 
   const examples = [
@@ -46,9 +51,12 @@ const MolarMassCalculator = () => {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-blue-900 mb-2">
-              Chemical Formula
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-blue-900">
+                Chemical Formula
+              </label>
+              <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+            </div>
             <Input
               value={formula}
               onChange={(e) => setFormula(e.target.value)}

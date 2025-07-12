@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calculator, Beaker } from 'lucide-react';
 import { calculateStoichiometry } from '@/utils/chemistryCalculations';
+import ChemicalSymbolInserter from './ChemicalSymbolInserter';
 
 const StoichiometryCalculator = () => {
   const [equation, setEquation] = useState('');
@@ -73,6 +74,10 @@ const StoichiometryCalculator = () => {
     }));
   };
 
+  const insertSymbol = (symbol: string) => {
+    setEquation(prev => prev + symbol);
+  };
+
   const formatValue = (value: unknown): string => {
     if (typeof value === 'number') {
       return value.toFixed(4);
@@ -107,12 +112,15 @@ const StoichiometryCalculator = () => {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label className="text-blue-900">Balanced Chemical Equation</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-blue-900">Balanced Chemical Equation</Label>
+              <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+            </div>
             <Input
               value={equation}
               onChange={(e) => setEquation(e.target.value)}
               placeholder="e.g., 2H2 + O2 → 2H2O"
-              className="text-lg mt-1"
+              className="text-lg"
             />
           </div>
 

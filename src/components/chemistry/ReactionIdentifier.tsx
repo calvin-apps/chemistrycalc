@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeftRight, Info } from 'lucide-react';
 import { identifyReactionType } from '@/utils/chemistryCalculations';
+import ChemicalSymbolInserter from './ChemicalSymbolInserter';
 
 const ReactionIdentifier = () => {
   const [equation, setEquation] = useState('');
@@ -15,6 +16,10 @@ const ReactionIdentifier = () => {
   const handleIdentify = () => {
     const identification = identifyReactionType(equation);
     setResult(identification);
+  };
+
+  const insertSymbol = (symbol: string) => {
+    setEquation(prev => prev + symbol);
   };
 
   const reactionTypes = {
@@ -40,9 +45,12 @@ const ReactionIdentifier = () => {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-blue-900 mb-2">
-              Chemical Equation
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-blue-900">
+                Chemical Equation
+              </label>
+              <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+            </div>
             <Input
               value={equation}
               onChange={(e) => setEquation(e.target.value)}
