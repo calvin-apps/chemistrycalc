@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calculator, FlaskConical, Scale, Atom, ArrowLeftRight, Beaker, Target, Wind, Droplet } from 'lucide-react';
+import { Calculator, FlaskConical, Scale, Atom, ArrowLeftRight, Beaker, Target, Wind, Droplet, ArrowRight, BookOpen, ArrowLeft } from 'lucide-react';
 import EquationBalancer from '@/components/chemistry/EquationBalancer';
 import ReactionIdentifier from '@/components/chemistry/ReactionIdentifier';
 import StoichiometryCalculator from '@/components/chemistry/StoichiometryCalculator';
@@ -13,6 +13,11 @@ import FormulaCalculator from '@/components/chemistry/FormulaCalculator';
 import PercentYieldCalculator from '@/components/chemistry/PercentYieldCalculator';
 import PhCalculator from '@/components/chemistry/PhCalculator';
 import GasLawCalculator from '@/components/chemistry/GasLawCalculator';
+import WordEquationConverter from '@/components/chemistry/WordEquationConverter';
+import ConjugatePairIdentifier from '@/components/chemistry/ConjugatePairIdentifier';
+import SubstancePHDeterminer from '@/components/chemistry/SubstancePHDeterminer';
+import ReactantGenerator from '@/components/chemistry/ReactantGenerator';
+import ChemistryReference from '@/components/chemistry/ChemistryReference';
 import OverflowToolbar from '@/components/OverflowToolbar';
 
 const Index = () => {
@@ -36,7 +41,7 @@ const Index = () => {
         {/* Main Calculator Interface */}
         <div className="max-w-7xl mx-auto">
           <Tabs defaultValue="balancer" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 mb-8 bg-white/10 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-5 lg:grid-cols-15 mb-8 bg-white/10 backdrop-blur-sm overflow-x-auto">
               <TabsTrigger 
                 value="balancer" 
                 className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
@@ -45,11 +50,39 @@ const Index = () => {
                 <span className="hidden sm:inline">Balancer</span>
               </TabsTrigger>
               <TabsTrigger 
+                value="word-converter"
+                className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
+              >
+                <ArrowRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Word → Chem</span>
+              </TabsTrigger>
+              <TabsTrigger 
                 value="reactions"
                 className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
               >
                 <ArrowLeftRight className="w-4 h-4" />
                 <span className="hidden sm:inline">Reactions</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="conjugate"
+                className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
+              >
+                <ArrowLeftRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Conjugate</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ph-determiner"
+                className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
+              >
+                <Droplet className="w-4 h-4" />
+                <span className="hidden sm:inline">pH Test</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reactant-gen"
+                className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Reactants</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="stoichiometry"
@@ -107,14 +140,37 @@ const Index = () => {
                 <Wind className="w-4 h-4" />
                 <span className="hidden sm:inline">Gas Laws</span>
               </TabsTrigger>
+              <TabsTrigger 
+                value="reference"
+                className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-900"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span className="hidden sm:inline">Reference</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="balancer">
               <EquationBalancer />
             </TabsContent>
 
+            <TabsContent value="word-converter">
+              <WordEquationConverter />
+            </TabsContent>
+
             <TabsContent value="reactions">
               <ReactionIdentifier />
+            </TabsContent>
+
+            <TabsContent value="conjugate">
+              <ConjugatePairIdentifier />
+            </TabsContent>
+
+            <TabsContent value="ph-determiner">
+              <SubstancePHDeterminer />
+            </TabsContent>
+
+            <TabsContent value="reactant-gen">
+              <ReactantGenerator />
             </TabsContent>
 
             <TabsContent value="stoichiometry">
@@ -147,6 +203,10 @@ const Index = () => {
 
             <TabsContent value="gaslaw">
               <GasLawCalculator />
+            </TabsContent>
+
+            <TabsContent value="reference">
+              <ChemistryReference />
             </TabsContent>
           </Tabs>
         </div>

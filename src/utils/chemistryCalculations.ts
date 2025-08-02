@@ -180,3 +180,190 @@ export const convertUnits = (value: number, fromUnit: string, toUnit: string, mo
 
   return value; // No conversion available
 };
+
+// Word equation to chemical equation converter
+export const convertWordEquation = (wordEquation: string) => {
+  const wordToFormula: { [key: string]: string } = {
+    // Common compounds
+    'water': 'H₂O',
+    'hydrogen': 'H₂',
+    'oxygen': 'O₂',
+    'carbon dioxide': 'CO₂',
+    'methane': 'CH₄',
+    'ammonia': 'NH₃',
+    'hydrogen chloride': 'HCl',
+    'sodium chloride': 'NaCl',
+    'calcium carbonate': 'CaCO₃',
+    'sulfuric acid': 'H₂SO₄',
+    'nitric acid': 'HNO₃',
+    'iron': 'Fe',
+    'iron oxide': 'Fe₂O₃',
+    'sodium': 'Na',
+    'chlorine': 'Cl₂',
+    'nitrogen': 'N₂',
+    'calcium oxide': 'CaO',
+    'carbon monoxide': 'CO',
+    'ethane': 'C₂H₆',
+    'propane': 'C₃H₈',
+    'butane': 'C₄H₁₀'
+  };
+
+  const cleanEquation = wordEquation.toLowerCase().trim();
+  let chemicalEquation = cleanEquation;
+
+  // Replace word compounds with chemical formulas
+  Object.entries(wordToFormula).forEach(([word, formula]) => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    chemicalEquation = chemicalEquation.replace(regex, formula);
+  });
+
+  // Replace common words
+  chemicalEquation = chemicalEquation.replace(/\bplus\b/g, '+');
+  chemicalEquation = chemicalEquation.replace(/\band\b/g, '+');
+  chemicalEquation = chemicalEquation.replace(/\byields\b/g, '→');
+  chemicalEquation = chemicalEquation.replace(/\bproduces\b/g, '→');
+  chemicalEquation = chemicalEquation.replace(/\bforms\b/g, '→');
+  chemicalEquation = chemicalEquation.replace(/\breacts with\b/g, '+');
+
+  return {
+    wordEquation,
+    chemicalEquation: chemicalEquation.trim(),
+    balanced: balanceEquation(chemicalEquation.trim()).balanced
+  };
+};
+
+// Conjugate acid-base pair identification
+export const identifyConjugatePairs = (compound: string) => {
+  const commonAcids: { [key: string]: { conjugateBase: string; strength: string } } = {
+    'HCl': { conjugateBase: 'Cl⁻', strength: 'Strong acid' },
+    'HBr': { conjugateBase: 'Br⁻', strength: 'Strong acid' },
+    'HI': { conjugateBase: 'I⁻', strength: 'Strong acid' },
+    'HNO₃': { conjugateBase: 'NO₃⁻', strength: 'Strong acid' },
+    'H₂SO₄': { conjugateBase: 'HSO₄⁻', strength: 'Strong acid' },
+    'HClO₄': { conjugateBase: 'ClO₄⁻', strength: 'Strong acid' },
+    'CH₃COOH': { conjugateBase: 'CH₃COO⁻', strength: 'Weak acid' },
+    'HF': { conjugateBase: 'F⁻', strength: 'Weak acid' },
+    'NH₄⁺': { conjugateBase: 'NH₃', strength: 'Weak acid' },
+    'H₃O⁺': { conjugateBase: 'H₂O', strength: 'Strong acid' }
+  };
+
+  const commonBases: { [key: string]: { conjugateAcid: string; strength: string } } = {
+    'OH⁻': { conjugateAcid: 'H₂O', strength: 'Strong base' },
+    'NH₃': { conjugateAcid: 'NH₄⁺', strength: 'Weak base' },
+    'CH₃COO⁻': { conjugateAcid: 'CH₃COOH', strength: 'Weak base' },
+    'F⁻': { conjugateAcid: 'HF', strength: 'Weak base' },
+    'Cl⁻': { conjugateAcid: 'HCl', strength: 'Very weak base' },
+    'H₂O': { conjugateAcid: 'H₃O⁺', strength: 'Very weak base' }
+  };
+
+  if (commonAcids[compound]) {
+    return {
+      type: 'acid',
+      compound,
+      conjugate: commonAcids[compound].conjugateBase,
+      strength: commonAcids[compound].strength,
+      pair: `${compound} / ${commonAcids[compound].conjugateBase}`
+    };
+  }
+
+  if (commonBases[compound]) {
+    return {
+      type: 'base',
+      compound,
+      conjugate: commonBases[compound].conjugateAcid,
+      strength: commonBases[compound].strength,
+      pair: `${commonBases[compound].conjugateAcid} / ${compound}`
+    };
+  }
+
+  return {
+    type: 'unknown',
+    compound,
+    conjugate: 'Not found',
+    strength: 'Unknown',
+    pair: 'Not identified'
+  };
+};
+
+// Enhanced pH determination
+export const determineSubstancePH = (substance: string) => {
+  const substancePH: { [key: string]: { ph: number; type: string; description: string } } = {
+    'HCl': { ph: 0.5, type: 'Strong Acid', description: 'Hydrochloric acid - very corrosive' },
+    'H₂SO₄': { ph: 0.3, type: 'Strong Acid', description: 'Sulfuric acid - very dangerous' },
+    'HNO₃': { ph: 0.4, type: 'Strong Acid', description: 'Nitric acid - oxidizing agent' },
+    'lemon juice': { ph: 2.0, type: 'Acidic', description: 'Citric acid content' },
+    'vinegar': { ph: 2.4, type: 'Acidic', description: 'Acetic acid solution' },
+    'coffee': { ph: 5.0, type: 'Acidic', description: 'Caffeic and chlorogenic acids' },
+    'milk': { ph: 6.6, type: 'Slightly Acidic', description: 'Lactic acid present' },
+    'pure water': { ph: 7.0, type: 'Neutral', description: 'Perfect neutral pH' },
+    'H₂O': { ph: 7.0, type: 'Neutral', description: 'Pure water' },
+    'baking soda': { ph: 9.0, type: 'Basic', description: 'Sodium bicarbonate solution' },
+    'NaHCO₃': { ph: 9.0, type: 'Basic', description: 'Sodium bicarbonate' },
+    'ammonia': { ph: 11.0, type: 'Strong Base', description: 'Ammonia solution' },
+    'NH₃': { ph: 11.0, type: 'Strong Base', description: 'Ammonia gas in water' },
+    'NaOH': { ph: 13.0, type: 'Strong Base', description: 'Sodium hydroxide - caustic' },
+    'KOH': { ph: 13.0, type: 'Strong Base', description: 'Potassium hydroxide' }
+  };
+
+  const normalizedSubstance = substance.toLowerCase().trim();
+  
+  for (const [key, value] of Object.entries(substancePH)) {
+    if (key.toLowerCase() === normalizedSubstance || key === substance) {
+      return {
+        substance,
+        ph: value.ph,
+        type: value.type,
+        description: value.description,
+        classification: value.ph < 7 ? 'Acidic' : value.ph > 7 ? 'Basic' : 'Neutral'
+      };
+    }
+  }
+
+  return {
+    substance,
+    ph: null,
+    type: 'Unknown',
+    description: 'pH data not available for this substance',
+    classification: 'Unknown'
+  };
+};
+
+// Reactant generator from products
+export const generateReactants = (product: string) => {
+  const productToReactants: { [key: string]: { reactants: string[]; reactionType: string; equation: string }[] } = {
+    'H₂O': [
+      { reactants: ['H₂', 'O₂'], reactionType: 'Synthesis', equation: '2H₂ + O₂ → 2H₂O' },
+      { reactants: ['HCl', 'NaOH'], reactionType: 'Neutralization', equation: 'HCl + NaOH → NaCl + H₂O' },
+      { reactants: ['CH₄', 'O₂'], reactionType: 'Combustion', equation: 'CH₄ + 2O₂ → CO₂ + 2H₂O' }
+    ],
+    'CO₂': [
+      { reactants: ['C', 'O₂'], reactionType: 'Synthesis', equation: 'C + O₂ → CO₂' },
+      { reactants: ['CH₄', 'O₂'], reactionType: 'Combustion', equation: 'CH₄ + 2O₂ → CO₂ + 2H₂O' },
+      { reactants: ['CaCO₃'], reactionType: 'Decomposition', equation: 'CaCO₃ → CaO + CO₂' }
+    ],
+    'NaCl': [
+      { reactants: ['Na', 'Cl₂'], reactionType: 'Synthesis', equation: '2Na + Cl₂ → 2NaCl' },
+      { reactants: ['HCl', 'NaOH'], reactionType: 'Neutralization', equation: 'HCl + NaOH → NaCl + H₂O' }
+    ],
+    'Fe₂O₃': [
+      { reactants: ['Fe', 'O₂'], reactionType: 'Synthesis', equation: '4Fe + 3O₂ → 2Fe₂O₃' }
+    ],
+    'NH₃': [
+      { reactants: ['N₂', 'H₂'], reactionType: 'Synthesis (Haber Process)', equation: 'N₂ + 3H₂ → 2NH₃' }
+    ]
+  };
+
+  const normalizedProduct = product.trim();
+  
+  if (productToReactants[normalizedProduct]) {
+    return {
+      product: normalizedProduct,
+      possibleReactions: productToReactants[normalizedProduct]
+    };
+  }
+
+  return {
+    product: normalizedProduct,
+    possibleReactions: []
+  };
+};
