@@ -37,35 +37,37 @@ const EquationBalancer = () => {
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl text-blue-900">
-          <Scale className="w-6 h-6" />
-          Chemical Equation Balancer
+      <CardHeader className="pb-4 sm:pb-6">
+        <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl text-blue-900">
+          <Scale className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+          <span className="leading-tight">Chemical Equation Balancer</span>
         </CardTitle>
-        <CardDescription className="text-blue-700">
+        <CardDescription className="text-blue-700 text-sm sm:text-base">
           Enter a chemical equation to get the balanced version with proper coefficients
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
+      <CardContent className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
               <label className="block text-sm font-medium text-blue-900">
                 Chemical Equation (use → or = for reaction arrow)
               </label>
-              <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+              <div className="self-start sm:self-auto">
+                <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+              </div>
             </div>
             <Input
               value={equation}
               onChange={(e) => setEquation(e.target.value)}
               placeholder="e.g., H2 + O2 → H2O"
-              className="text-lg font-mono"
+              className="text-base sm:text-lg font-mono touch-manipulation"
             />
           </div>
           
           <Button 
             onClick={handleBalance}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            className="w-full bg-blue-600 hover:bg-blue-700 h-12 sm:h-10 touch-manipulation"
             disabled={!equation.trim()}
           >
             Balance Equation
@@ -87,7 +89,7 @@ const EquationBalancer = () => {
             <AlertDescription>
               <div className="space-y-2">
                 <p className="font-semibold text-green-800">Balanced Equation:</p>
-                <p className="text-lg font-mono bg-white p-3 rounded border text-green-900">
+                <p className="text-sm sm:text-lg font-mono bg-white p-3 rounded border text-green-900 break-all">
                   {result.balanced}
                 </p>
                 {result.coefficients && (
@@ -100,14 +102,18 @@ const EquationBalancer = () => {
           </Alert>
         )}
 
-        <div className="mt-8">
-          <h3 className="font-semibold text-blue-900 mb-3">Example Equations:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="mt-6 sm:mt-8">
+          <h3 className="font-semibold text-blue-900 mb-3 text-sm sm:text-base">Example Equations:</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {examples.map((example, index) => (
               <button
                 key={index}
                 onClick={() => setEquation(example)}
-                className="text-left p-3 text-sm bg-blue-50 hover:bg-blue-100 rounded border transition-colors font-mono text-blue-800"
+                className="
+                  text-left p-3 text-sm bg-blue-50 hover:bg-blue-100 
+                  rounded border transition-colors font-mono text-blue-800
+                  touch-manipulation min-h-[44px] flex items-center
+                "
               >
                 {example}
               </button>

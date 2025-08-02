@@ -39,35 +39,37 @@ const MolarMassCalculator = () => {
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl text-blue-900">
-          <Atom className="w-6 h-6" />
-          Molar Mass Calculator
+      <CardHeader className="pb-4 sm:pb-6">
+        <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl text-blue-900">
+          <Atom className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+          <span className="leading-tight">Molar Mass Calculator</span>
         </CardTitle>
-        <CardDescription className="text-blue-700">
+        <CardDescription className="text-blue-700 text-sm sm:text-base">
           Calculate the molar mass of any chemical compound
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
+      <CardContent className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
               <label className="block text-sm font-medium text-blue-900">
                 Chemical Formula
               </label>
-              <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+              <div className="self-start sm:self-auto">
+                <ChemicalSymbolInserter onSymbolInsert={insertSymbol} />
+              </div>
             </div>
             <Input
               value={formula}
               onChange={(e) => setFormula(e.target.value)}
               placeholder="e.g., H2O, NaCl, C6H12O6"
-              className="text-lg"
+              className="text-base sm:text-lg touch-manipulation"
             />
           </div>
           
           <Button 
             onClick={handleCalculate}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            className="w-full bg-blue-600 hover:bg-blue-700 h-12 sm:h-10 touch-manipulation"
             disabled={!formula.trim()}
           >
             Calculate Molar Mass
@@ -88,8 +90,8 @@ const MolarMassCalculator = () => {
             <AlertDescription>
               <div className="space-y-3">
                 <div>
-                  <p className="font-semibold text-green-800">Formula: {result.formula}</p>
-                  <p className="text-2xl font-bold text-green-900 mt-2">
+                  <p className="font-semibold text-green-800 text-sm sm:text-base">Formula: {result.formula}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-900 mt-2">
                     {result.molarMass.toFixed(2)} g/mol
                   </p>
                 </div>
@@ -116,14 +118,18 @@ const MolarMassCalculator = () => {
           </Alert>
         )}
 
-        <div className="mt-8">
-          <h3 className="font-semibold text-blue-900 mb-3">Example Formulas:</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="mt-6 sm:mt-8">
+          <h3 className="font-semibold text-blue-900 mb-3 text-sm sm:text-base">Example Formulas:</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {examples.map((example, index) => (
               <button
                 key={index}
                 onClick={() => setFormula(example)}
-                className="text-left p-3 text-sm bg-blue-50 hover:bg-blue-100 rounded border transition-colors font-mono text-blue-800"
+                className="
+                  text-left p-3 text-sm bg-blue-50 hover:bg-blue-100 
+                  rounded border transition-colors font-mono text-blue-800
+                  touch-manipulation min-h-[44px] flex items-center justify-center
+                "
               >
                 {example}
               </button>
