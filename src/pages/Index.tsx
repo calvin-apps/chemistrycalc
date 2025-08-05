@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calculator, FlaskConical, Scale, Atom, ArrowLeftRight, Beaker, Target, Wind, Droplet, ArrowRight, BookOpen, ArrowLeft } from 'lucide-react';
+import { Calculator, FlaskConical, Scale, Atom, ArrowLeftRight, Beaker, Target, Wind, Droplet, ArrowRight, BookOpen, ArrowLeft, LayoutGrid, Type } from 'lucide-react';
 import EquationBalancer from '@/components/chemistry/EquationBalancer';
 import ReactionIdentifier from '@/components/chemistry/ReactionIdentifier';
 import StoichiometryCalculator from '@/components/chemistry/StoichiometryCalculator';
@@ -18,6 +18,9 @@ import ConjugatePairIdentifier from '@/components/chemistry/ConjugatePairIdentif
 import SubstancePHDeterminer from '@/components/chemistry/SubstancePHDeterminer';
 import ReactantGenerator from '@/components/chemistry/ReactantGenerator';
 import ChemistryReference from '@/components/chemistry/ChemistryReference';
+import ChemicalSymbolInserter from '@/components/chemistry/ChemicalSymbolInserter';
+import ChemistryFormulasView from '@/components/chemistry/ChemistryFormulasView';
+import PeriodicTableView from '@/components/chemistry/PeriodicTableView';
 import OverflowToolbar from '@/components/OverflowToolbar';
 
 const Index = () => {
@@ -32,7 +35,7 @@ const Index = () => {
           <div className="flex items-center justify-center mb-3 sm:mb-4">
             <FlaskConical className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 text-blue-300 mr-2 sm:mr-3" />
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-              ChemQuest Solver
+              ChemX
             </h1>
           </div>
           <p className="text-sm sm:text-lg md:text-xl text-blue-200 max-w-2xl mx-auto px-4">
@@ -253,6 +256,48 @@ const Index = () => {
                 <span className="sm:hidden">Gas</span>
               </TabsTrigger>
               <TabsTrigger 
+                value="periodic-table"
+                className="
+                  flex items-center gap-1 sm:gap-2 
+                  data-[state=active]:bg-white data-[state=active]:text-blue-900
+                  min-w-[80px] sm:min-w-0 px-2 sm:px-3 py-2 sm:py-2.5
+                  text-xs sm:text-sm whitespace-nowrap
+                  touch-manipulation
+                "
+              >
+                <LayoutGrid className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Periodic Table</span>
+                <span className="sm:hidden">Table</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="symbol-inserter"
+                className="
+                  flex items-center gap-1 sm:gap-2 
+                  data-[state=active]:bg-white data-[state=active]:text-blue-900
+                  min-w-[80px] sm:min-w-0 px-2 sm:px-3 py-2 sm:py-2.5
+                  text-xs sm:text-sm whitespace-nowrap
+                  touch-manipulation
+                "
+              >
+                <Type className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Symbols</span>
+                <span className="sm:hidden">Sym</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="formulas-view"
+                className="
+                  flex items-center gap-1 sm:gap-2 
+                  data-[state=active]:bg-white data-[state=active]:text-blue-900
+                  min-w-[80px] sm:min-w-0 px-2 sm:px-3 py-2 sm:py-2.5
+                  text-xs sm:text-sm whitespace-nowrap
+                  touch-manipulation
+                "
+              >
+                <Atom className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Formula View</span>
+                <span className="sm:hidden">View</span>
+              </TabsTrigger>
+              <TabsTrigger 
                 value="reference"
                 className="
                   flex items-center gap-1 sm:gap-2 
@@ -323,6 +368,25 @@ const Index = () => {
 
             <TabsContent value="gaslaw">
               <GasLawCalculator />
+            </TabsContent>
+
+            <TabsContent value="periodic-table">
+              <PeriodicTableView />
+            </TabsContent>
+
+            <TabsContent value="symbol-inserter">
+              <ChemicalSymbolInserter onSymbolInsert={(symbol) => {
+                // Copy symbol to clipboard for easy use
+                navigator.clipboard.writeText(symbol).then(() => {
+                  console.log('Symbol copied to clipboard:', symbol);
+                }).catch(() => {
+                  console.log('Could not copy symbol to clipboard');
+                });
+              }} />
+            </TabsContent>
+
+            <TabsContent value="formulas-view">
+              <ChemistryFormulasView />
             </TabsContent>
 
             <TabsContent value="reference">
