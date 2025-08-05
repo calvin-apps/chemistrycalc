@@ -20,26 +20,24 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 transition-opacity duration-500 safe-area-top safe-area-bottom ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <div className="text-center animate-fade-in">
+      <div className="text-center p-4 w-full max-w-lg mx-auto">
         {/* Logo and App Name */}
-        <div className="flex items-center justify-center mb-8 animate-scale-in">
-          <FlaskConical className="w-20 h-20 text-blue-300 mr-4 animate-pulse" />
-          <div>
-            <h1 className="text-6xl font-bold text-white mb-2">
-              ChemQuest
+        <div className="flex flex-col items-center justify-center mb-8 animate-pulse">
+          <FlaskConical className="w-16 h-16 sm:w-20 sm:h-20 text-blue-300 mb-4" />
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-6xl font-bold text-white mb-2 tracking-wide">
+              ChemX
             </h1>
-            <h2 className="text-4xl font-semibold text-blue-200">
-              Solver
-            </h2>
+            <div className="w-16 h-1 bg-blue-400 mx-auto rounded-full"></div>
           </div>
         </div>
 
         {/* Tagline */}
-        <p className="text-xl text-blue-200 mb-12 max-w-md mx-auto">
+        <p className="text-lg sm:text-xl text-blue-200 mb-8 px-4 leading-relaxed">
           Your comprehensive chemistry calculation companion
         </p>
 
@@ -54,8 +52,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
         {/* Creator Information */}
         <div className="text-center">
-          <p className="text-blue-300 text-lg mb-2">Created by</p>
-          <p className="text-white text-2xl font-semibold">Mafole Makhetha</p>
+          <p className="text-blue-300 text-sm sm:text-lg mb-2">Created by</p>
+          <p className="text-white text-lg sm:text-2xl font-semibold">Mafole Makhetha</p>
         </div>
       </div>
     </div>
