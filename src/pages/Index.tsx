@@ -24,6 +24,27 @@ import PeriodicTableView from '@/components/chemistry/PeriodicTableView';
 import OverflowToolbar from '@/components/OverflowToolbar';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState<string>('balancer');
+  const tools = [
+    { value: 'balancer', label: 'Equation Balancer' },
+    { value: 'word-converter', label: 'Word → Chemical' },
+    { value: 'reactions', label: 'Reaction Identifier' },
+    { value: 'conjugate', label: 'Conjugate Pairs' },
+    { value: 'ph-determiner', label: 'Substance pH Test' },
+    { value: 'reactant-gen', label: 'Reactant Generator' },
+    { value: 'stoichiometry', label: 'Stoichiometry' },
+    { value: 'molarmass', label: 'Molar Mass' },
+    { value: 'converter', label: 'Unit Converter' },
+    { value: 'concentration', label: 'Concentration' },
+    { value: 'formulas', label: 'Formula Calculator' },
+    { value: 'yield', label: 'Percent Yield' },
+    { value: 'ph', label: 'pH/pOH Calculator' },
+    { value: 'gaslaw', label: 'Gas Laws' },
+    { value: 'periodic-table', label: 'Periodic Table' },
+    { value: 'symbol-inserter', label: 'Chemical Symbols' },
+    { value: 'formulas-view', label: 'Formulas Reference' },
+    { value: 'reference', label: 'Chemistry Reference' },
+  ];
   return (
     <div className="min-h-mobile bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 relative safe-area-top safe-area-bottom">
       {/* Overflow Toolbar */}
@@ -45,7 +66,7 @@ const Index = () => {
 
         {/* Main Calculator Interface */}
         <div className="max-w-7xl mx-auto">
-          <Tabs defaultValue="balancer" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Mobile: Horizontal scroll tabs, Desktop: Grid layout */}
             <div className="mb-4 sm:mb-8">
               <TabsList className="
@@ -59,6 +80,20 @@ const Index = () => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none'
               }}>
+              <TabsTrigger 
+                value="all-tools"
+                className="
+                  flex items-center gap-1 sm:gap-2 
+                  data-[state=active]:bg-white data-[state=active]:text-blue-900
+                  min-w-[80px] sm:min-w-0 px-2 sm:px-3 py-2 sm:py-2.5
+                  text-xs sm:text-sm whitespace-nowrap
+                  touch-manipulation
+                "
+              >
+                <LayoutGrid className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="hidden sm:inline">All Tools</span>
+                <span className="sm:hidden">All</span>
+              </TabsTrigger>
               <TabsTrigger 
                 value="balancer" 
                 className="
@@ -313,6 +348,33 @@ const Index = () => {
               </TabsTrigger>
               </TabsList>
             </div>
+
+            <TabsContent value="all-tools">
+              <section aria-labelledby="all-tools-heading" className="mt-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle id="all-tools-heading">All Tools</CardTitle>
+                    <CardDescription>Select a tool to open its tab</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <nav aria-label="All tools">
+                      <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {tools.map((tool) => (
+                          <li key={tool.value}>
+                            <button
+                              onClick={() => setActiveTab(tool.value)}
+                              className="w-full rounded-md border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground transition-colors py-2 px-3 text-sm"
+                            >
+                              {tool.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  </CardContent>
+                </Card>
+              </section>
+            </TabsContent>
 
             <TabsContent value="balancer">
               <EquationBalancer />
