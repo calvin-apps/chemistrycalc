@@ -75,7 +75,7 @@ const Index = () => {
                 bg-white/10 backdrop-blur-sm
                 overflow-x-auto md:overflow-x-visible
                 gap-1 md:gap-0
-                scrollbar-hide
+                scrollbar-hide justify-start md:justify-center
               " style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none'
