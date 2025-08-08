@@ -32,7 +32,7 @@ const Index = () => {
     { value: 'conjugate', label: 'Conjugate Pairs' },
     { value: 'ph-determiner', label: 'Substance pH Test' },
     { value: 'reactant-gen', label: 'Reactant Generator' },
-    { value: 'stoichiometry', label: 'Stoichiometry' },
+    { value: 'stoichiometry', label: 'Limiting Reagent' },
     { value: 'molarmass', label: 'Molar Mass' },
     { value: 'converter', label: 'Unit Converter' },
     { value: 'concentration', label: 'Concentration' },
@@ -189,8 +189,8 @@ const Index = () => {
                 "
               >
                 <Calculator className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="hidden sm:inline">Stoichiometry</span>
-                <span className="sm:hidden">Stoich</span>
+                <span className="hidden sm:inline">Limiting Reagent</span>
+                <span className="sm:hidden">Limit</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="molarmass"
