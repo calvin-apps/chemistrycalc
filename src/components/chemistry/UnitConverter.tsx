@@ -15,7 +15,7 @@ const UnitConverter = () => {
   const [molarMass, setMolarMass] = useState('');
   const [result, setResult] = useState<number | null>(null);
 
-  // Text mode removed: using dropdown-based conversions only
+  // Text mode removed: dropdown mode only
 
   const convertCubicUnits = (val: number, fromUnit: string, toUnit: string): number => {
     const volumeConversions: { [key: string]: number } = {
@@ -67,134 +67,91 @@ const UnitConverter = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-
-        {isTextMode ? (
-          // Text Input Mode
+        {/* Dropdown Mode Only */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <Label className="text-blue-900">Conversion Expression</Label>
+              <Label className="text-blue-900">Value</Label>
               <Input
-                type="text"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="e.g., dm³ to cm³ or 5 dm³ to cm³"
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="Enter value"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label className="text-blue-900">From Unit</Label>
+              <Select value={fromUnit} onValueChange={setFromUnit}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="grams">Grams (g)</SelectItem>
+                  <SelectItem value="kilograms">Kilograms (kg)</SelectItem>
+                  <SelectItem value="moles">Moles (mol)</SelectItem>
+                  <SelectItem value="liters">Liters (L)</SelectItem>
+                  <SelectItem value="milliliters">Milliliters (mL)</SelectItem>
+                  <SelectItem value="dm3">Cubic Decimeters (dm³)</SelectItem>
+                  <SelectItem value="cm3">Cubic Centimeters (cm³)</SelectItem>
+                  <SelectItem value="mm3">Cubic Millimeters (mm³)</SelectItem>
+                  <SelectItem value="m3">Cubic Meters (m³)</SelectItem>
+                  <SelectItem value="atoms">Atoms/Molecules</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-blue-900">To Unit</Label>
+              <Select value={toUnit} onValueChange={setToUnit}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="grams">Grams (g)</SelectItem>
+                  <SelectItem value="kilograms">Kilograms (kg)</SelectItem>
+                  <SelectItem value="moles">Moles (mol)</SelectItem>
+                  <SelectItem value="liters">Liters (L)</SelectItem>
+                  <SelectItem value="milliliters">Milliliters (mL)</SelectItem>
+                  <SelectItem value="dm3">Cubic Decimeters (dm³)</SelectItem>
+                  <SelectItem value="cm3">Cubic Centimeters (cm³)</SelectItem>
+                  <SelectItem value="mm3">Cubic Millimeters (mm³)</SelectItem>
+                  <SelectItem value="m3">Cubic Meters (m³)</SelectItem>
+                  <SelectItem value="atoms">Atoms/Molecules</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label className="text-blue-900">Molar Mass (g/mol)</Label>
+              <Input
+                type="number"
+                value={molarMass}
+                onChange={(e) => setMolarMass(e.target.value)}
+                placeholder="Required for mole conversions"
                 className="mt-1"
               />
               <p className="text-xs text-blue-600 mt-1">
-                Supported: dm³, cm³, mm³, m³, L, mL, g, kg, mol, atoms
+                Only needed for conversions involving moles
               </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label className="text-blue-900">Value (if not in expression)</Label>
-                <Input
-                  type="number"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  placeholder="Enter value"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="text-blue-900">Molar Mass (g/mol)</Label>
-                <Input
-                  type="number"
-                  value={molarMass}
-                  onChange={(e) => setMolarMass(e.target.value)}
-                  placeholder="For mole conversions"
-                  className="mt-1"
-                />
-              </div>
+
+            <div className="flex items-center justify-center p-8">
+              <ArrowUpDown className="w-8 h-8 text-blue-400" />
             </div>
+
+            <button
+              onClick={handleConvert}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
+              disabled={!value || !fromUnit || !toUnit}
+            >
+              Convert
+            </button>
           </div>
-        ) : (
-          // Dropdown Mode
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label className="text-blue-900">Value</Label>
-                <Input
-                  type="number"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  placeholder="Enter value"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label className="text-blue-900">From Unit</Label>
-                <Select value={fromUnit} onValueChange={setFromUnit}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="grams">Grams (g)</SelectItem>
-                    <SelectItem value="kilograms">Kilograms (kg)</SelectItem>
-                    <SelectItem value="moles">Moles (mol)</SelectItem>
-                    <SelectItem value="liters">Liters (L)</SelectItem>
-                    <SelectItem value="milliliters">Milliliters (mL)</SelectItem>
-                    <SelectItem value="dm3">Cubic Decimeters (dm³)</SelectItem>
-                    <SelectItem value="cm3">Cubic Centimeters (cm³)</SelectItem>
-                    <SelectItem value="mm3">Cubic Millimeters (mm³)</SelectItem>
-                    <SelectItem value="m3">Cubic Meters (m³)</SelectItem>
-                    <SelectItem value="atoms">Atoms/Molecules</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-blue-900">To Unit</Label>
-                <Select value={toUnit} onValueChange={setToUnit}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="grams">Grams (g)</SelectItem>
-                    <SelectItem value="kilograms">Kilograms (kg)</SelectItem>
-                    <SelectItem value="moles">Moles (mol)</SelectItem>
-                    <SelectItem value="liters">Liters (L)</SelectItem>
-                    <SelectItem value="milliliters">Milliliters (mL)</SelectItem>
-                    <SelectItem value="dm3">Cubic Decimeters (dm³)</SelectItem>
-                    <SelectItem value="cm3">Cubic Centimeters (cm³)</SelectItem>
-                    <SelectItem value="mm3">Cubic Millimeters (mm³)</SelectItem>
-                    <SelectItem value="m3">Cubic Meters (m³)</SelectItem>
-                    <SelectItem value="atoms">Atoms/Molecules</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="text-blue-900">Molar Mass (g/mol)</Label>
-                <Input
-                  type="number"
-                  value={molarMass}
-                  onChange={(e) => setMolarMass(e.target.value)}
-                  placeholder="Required for mole conversions"
-                  className="mt-1"
-                />
-                <p className="text-xs text-blue-600 mt-1">
-                  Only needed for conversions involving moles
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center p-8">
-                <ArrowUpDown className="w-8 h-8 text-blue-400" />
-              </div>
-
-              <button
-                onClick={handleConvert}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
-                disabled={isTextMode ? !textInput : (!value || !fromUnit || !toUnit)}
-              >
-                Convert
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
 
         {result !== null && (
           <Alert className="border-blue-200 bg-blue-50">
