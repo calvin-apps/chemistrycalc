@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FlaskConical, ArrowUpDown, Type } from 'lucide-react';
+import { FlaskConical, ArrowUpDown } from 'lucide-react';
 import { convertUnits } from '@/utils/chemistryCalculations';
 
 const UnitConverter = () => {
@@ -13,61 +13,9 @@ const UnitConverter = () => {
   const [fromUnit, setFromUnit] = useState('');
   const [toUnit, setToUnit] = useState('');
   const [molarMass, setMolarMass] = useState('');
-  const [textInput, setTextInput] = useState('');
   const [result, setResult] = useState<number | null>(null);
-  const [isTextMode, setIsTextMode] = useState(false);
 
-  const unitAliases: { [key: string]: string } = {
-    'dm³': 'dm3',
-    'cm³': 'cm3',
-    'mm³': 'mm3',
-    'm³': 'm3',
-    'dm3': 'dm3',
-    'cm3': 'cm3',
-    'mm3': 'mm3',
-    'm3': 'm3',
-    'L': 'liters',
-    'l': 'liters',
-    'mL': 'milliliters',
-    'ml': 'milliliters',
-    'g': 'grams',
-    'kg': 'kilograms',
-    'mol': 'moles',
-    'atoms': 'atoms',
-    'molecules': 'atoms'
-  };
-
-  const parseTextInput = (input: string) => {
-    // Parse patterns like "dm³ to cm³" or "5 dm³ to cm³"
-    const patterns = [
-      /^(\d+\.?\d*)\s*(\w+³?)\s+to\s+(\w+³?)$/i,
-      /^(\w+³?)\s+to\s+(\w+³?)$/i
-    ];
-
-    for (const pattern of patterns) {
-      const match = input.match(pattern);
-      if (match) {
-        if (match.length === 4) {
-          // Pattern with value
-          const [, val, from, to] = match;
-          return {
-            value: val,
-            fromUnit: unitAliases[from] || from.toLowerCase(),
-            toUnit: unitAliases[to] || to.toLowerCase()
-          };
-        } else if (match.length === 3) {
-          // Pattern without value
-          const [, from, to] = match;
-          return {
-            value: value || '1',
-            fromUnit: unitAliases[from] || from.toLowerCase(),
-            toUnit: unitAliases[to] || to.toLowerCase()
-          };
-        }
-      }
-    }
-    return null;
-  };
+  // Text mode removed: using dropdown-based conversions only
 
   const convertCubicUnits = (val: number, fromUnit: string, toUnit: string): number => {
     const volumeConversions: { [key: string]: number } = {
@@ -88,25 +36,14 @@ const UnitConverter = () => {
   };
 
   const handleConvert = () => {
-    let conversionValue, conversionFromUnit, conversionToUnit;
-
-    if (isTextMode && textInput) {
-      const parsed = parseTextInput(textInput);
-      if (!parsed) return;
-      
-      conversionValue = parseFloat(parsed.value);
-      conversionFromUnit = parsed.fromUnit;
-      conversionToUnit = parsed.toUnit;
-    } else {
-      conversionValue = parseFloat(value);
-      conversionFromUnit = fromUnit;
-      conversionToUnit = toUnit;
-    }
+    const conversionValue = parseFloat(value);
+    const conversionFromUnit = fromUnit;
+    const conversionToUnit = toUnit;
 
     if (isNaN(conversionValue)) return;
-    
+
     const numMolarMass = parseFloat(molarMass);
-    
+
     // Check if it's a cubic unit conversion
     if ((conversionFromUnit?.includes('3') || conversionFromUnit === 'liters' || conversionFromUnit === 'milliliters') &&
         (conversionToUnit?.includes('3') || conversionToUnit === 'liters' || conversionToUnit === 'milliliters')) {
@@ -130,27 +67,6 @@ const UnitConverter = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Mode Toggle */}
-        <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
-          <button
-            onClick={() => setIsTextMode(false)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-              !isTextMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-100'
-            }`}
-          >
-            <ArrowUpDown className="w-4 h-4" />
-            Dropdown Mode
-          </button>
-          <button
-            onClick={() => setIsTextMode(true)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-              isTextMode ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-100'
-            }`}
-          >
-            <Type className="w-4 h-4" />
-            Text Mode
-          </button>
-        </div>
 
         {isTextMode ? (
           // Text Input Mode
@@ -285,8 +201,7 @@ const UnitConverter = () => {
             <AlertDescription>
               <div className="text-center">
                 <p className="text-lg font-semibold text-blue-900">
-                  {isTextMode ? textInput : `${value} ${fromUnit}`} = {result.toFixed(6)} {isTextMode ? 
-                    (textInput.includes('to') ? textInput.split('to')[1].trim() : toUnit) : toUnit}
+                  {value} {fromUnit} = {result.toFixed(6)} {toUnit}
                 </p>
               </div>
             </AlertDescription>

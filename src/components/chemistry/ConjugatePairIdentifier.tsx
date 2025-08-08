@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeftRight, Lightbulb } from 'lucide-react';
-import { identifyConjugatePairs } from '@/utils/chemistryCalculations';
+import { identifyConjugatePairs, identifyConjugatePairsInReaction } from '@/utils/chemistryCalculations';
 
 const ConjugatePairIdentifier = () => {
   const [compound, setCompound] = useState('');
@@ -13,21 +13,34 @@ const ConjugatePairIdentifier = () => {
 
   const handleIdentify = () => {
     if (!compound.trim()) {
-      setError('Please enter a compound');
+      setError('Please enter a compound or reaction');
       return;
     }
 
     try {
-      const identificationResult = identifyConjugatePairs(compound.trim());
-      setResult(identificationResult);
-      setError('');
+      const input = compound.trim();
+      const isReaction = /(→|->|=)/.test(input);
+      if (isReaction) {
+        const res = identifyConjugatePairsInReaction(input);
+        if (!res.pairs || res.pairs.length === 0) {
+          setError('No conjugate acid-base pairs identified in this reaction');
+          setResult(null);
+        } else {
+          setResult({ mode: 'reaction', ...res });
+          setError('');
+        }
+      } else {
+        const identificationResult = identifyConjugatePairs(input);
+        setResult({ mode: 'single', data: identificationResult });
+        setError('');
+      }
     } catch (err) {
       setError('Error identifying conjugate pairs');
       setResult(null);
     }
   };
 
-  const examples = ['HCl', 'NH₃', 'CH₃COOH', 'OH⁻', 'H₂O', 'F⁻'];
+  const examples = ['HCl', 'NH₃', 'CH₃COOH', 'OH⁻', 'H₂O', 'F⁻', 'HCl + H₂O -> H₃O⁺ + Cl⁻'];
 
   return (
     <Card className="w-full max-w-4xl mx-auto bg-white/90 backdrop-blur-sm">
@@ -47,7 +60,7 @@ const ConjugatePairIdentifier = () => {
             <Input
               value={compound}
               onChange={(e) => setCompound(e.target.value)}
-              placeholder="Enter compound (e.g., HCl, NH₃, OH⁻)"
+              placeholder="Enter compound or reaction (e.g., HCl, NH₃, or HCl + H2O -> H3O+ + Cl-)"
               className="flex-1"
             />
             <Button onClick={handleIdentify} className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -63,32 +76,59 @@ const ConjugatePairIdentifier = () => {
         )}
 
         {result && (
-          <Alert className={`border-green-200 bg-green-50 ${result.type === 'unknown' ? 'border-yellow-200 bg-yellow-50' : ''}`}>
-            <AlertDescription className={result.type === 'unknown' ? 'text-yellow-800' : 'text-green-800'}>
-              <div className="space-y-3">
-                <div>
-                  <strong>Compound:</strong>
-                  <p className="mt-1 font-mono text-lg">{result.compound}</p>
-                </div>
-                <div>
-                  <strong>Type:</strong>
-                  <p className="mt-1 capitalize">{result.type}</p>
-                </div>
-                <div>
-                  <strong>Conjugate Partner:</strong>
-                  <p className="mt-1 font-mono text-lg">{result.conjugate}</p>
-                </div>
-                <div>
-                  <strong>Conjugate Pair:</strong>
-                  <p className="mt-1 font-mono text-lg text-blue-600">{result.pair}</p>
-                </div>
-                <div>
-                  <strong>Strength:</strong>
-                  <p className="mt-1">{result.strength}</p>
-                </div>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <>
+            {result.mode === 'single' && result.data && (
+              <Alert className={`border-green-200 bg-green-50 ${result.data.type === 'unknown' ? 'border-yellow-200 bg-yellow-50' : ''}`}>
+                <AlertDescription className={result.data.type === 'unknown' ? 'text-yellow-800' : 'text-green-800'}>
+                  <div className="space-y-3">
+                    <div>
+                      <strong>Compound:</strong>
+                      <p className="mt-1 font-mono text-lg">{result.data.compound}</p>
+                    </div>
+                    <div>
+                      <strong>Type:</strong>
+                      <p className="mt-1 capitalize">{result.data.type}</p>
+                    </div>
+                    <div>
+                      <strong>Conjugate Partner:</strong>
+                      <p className="mt-1 font-mono text-lg">{result.data.conjugate}</p>
+                    </div>
+                    <div>
+                      <strong>Conjugate Pair:</strong>
+                      <p className="mt-1 font-mono text-lg text-blue-600">{result.data.pair}</p>
+                    </div>
+                    <div>
+                      <strong>Strength:</strong>
+                      <p className="mt-1">{result.data.strength}</p>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {result.mode === 'reaction' && result.pairs && (
+              <Alert className="border-green-200 bg-green-50">
+                <AlertDescription className="text-green-800">
+                  <div className="space-y-4">
+                    <div>
+                      <strong>Identified Conjugate Pairs:</strong>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {result.pairs.map((p: any, idx: number) => (
+                        <div key={idx} className="p-3 rounded-md bg-white border">
+                          <p className="text-sm text-blue-800 font-semibold capitalize">{p.type}</p>
+                          <p className="font-mono text-lg mt-1">{p.pair}</p>
+                          {p.strength && (
+                            <p className="text-sm mt-1">Strength: {p.strength}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
         )}
 
         <div className="space-y-3">

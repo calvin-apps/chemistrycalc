@@ -103,42 +103,79 @@ export const calculateMolarMass = (formula: string) => {
 };
 
 export const calculateStoichiometry = (equation: string, masses: { [key: string]: number }) => {
-  // Simplified stoichiometry calculation
-  const moles: { [key: string]: number } = {};
-  
-  // Calculate moles from masses (assuming we know molar masses)
-  const molarMasses = { H2: 2.016, O2: 31.998, H2O: 18.015 }; // simplified
-  
-  Object.entries(masses).forEach(([compound, mass]) => {
-    if (molarMasses[compound as keyof typeof molarMasses]) {
-      moles[compound] = mass / molarMasses[compound as keyof typeof molarMasses];
-    }
-  });
-  
-  // Find limiting reagent (simplified)
-  let limitingReagent = '';
-  let minMoles = Infinity;
-  
-  Object.entries(moles).forEach(([compound, molAmount]) => {
-    if (molAmount < minMoles) {
-      minMoles = molAmount;
-      limitingReagent = compound;
-    }
-  });
-  
-  // Calculate products (simplified for H2 + O2 → H2O)
-  const products: { [key: string]: number } = {};
-  if (limitingReagent === 'H2') {
-    products['H2O'] = minMoles * 18.015; // mass of water produced
-  } else if (limitingReagent === 'O2') {
-    products['H2O'] = minMoles * 2 * 18.015; // 1 O2 produces 2 H2O
-  }
+  try {
+    const normalizeFormula = (f: string) => {
+      // Normalize subscripts and remove charges/states/spaces
+      const subMap: Record<string, string> = { '₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9' };
+      let s = f.replace(/\s+/g, '');
+      s = s.replace(/[₀-₉]/g, (ch) => subMap[ch] || ch);
+      s = s.replace(/\((aq|s|l|g)\)/gi, '');
+      s = s.replace(/[⁺⁻]/g, '');
+      s = s.replace(/[+-]$/g, '');
+      return s;
+    };
 
-  return {
-    moles,
-    limitingReagent,
-    products
-  };
+    const cleanEq = equation.replace(/=/g, '→');
+    const arrowParts = cleanEq.split(/→|->/);
+    if (arrowParts.length < 2) {
+      return { moles: {}, limitingReagent: '', products: {} };
+    }
+
+    const parseSide = (side: string) => side
+      .split('+')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .map(s => {
+        const m = s.match(/^(\d+)\s*(.*)$/);
+        const coeff = m ? parseInt(m[1]) : 1;
+        const raw = m ? m[2].trim() : s;
+        const normalized = normalizeFormula(raw);
+        return { raw, normalized, coeff };
+      });
+
+    const reactants = parseSide(arrowParts[0]);
+    const products = parseSide(arrowParts[1]);
+
+    const molarMassOf = (formula: string) => calculateMolarMass(formula).molarMass;
+
+    // Compute moles of reactants from provided masses
+    const moles: { [key: string]: number } = {};
+    reactants.forEach(r => {
+      const mass = masses[r.raw] ?? masses[r.normalized] ?? 0;
+      if (mass > 0) {
+        const M = molarMassOf(r.normalized);
+        const n = mass / M;
+        moles[r.raw] = n;
+      } else {
+        moles[r.raw] = 0;
+      }
+    });
+
+    // Determine limiting reagent using extent = n/coeff (only positive extents)
+    const extents = reactants
+      .map(r => ({ r, extent: (moles[r.raw] || 0) / r.coeff }))
+      .filter(x => x.extent > 0);
+
+    if (extents.length === 0) {
+      return { moles, limitingReagent: '', products: {} };
+    }
+
+    const limiting = extents.reduce((a, b) => (a.extent <= b.extent ? a : b));
+    const extent = limiting.extent;
+    const limitingReagent = limiting.r.raw;
+
+    // Calculate product masses
+    const productsOut: { [key: string]: number } = {};
+    products.forEach(p => {
+      const M = molarMassOf(p.normalized);
+      const nProd = extent * p.coeff;
+      productsOut[p.raw] = nProd * M; // grams
+    });
+
+    return { moles, limitingReagent, products: productsOut };
+  } catch (e) {
+    return { moles: {}, limitingReagent: '', products: {} };
+  }
 };
 
 export const convertUnits = (value: number, fromUnit: string, toUnit: string, molarMass?: number) => {
@@ -283,6 +320,106 @@ export const identifyConjugatePairs = (compound: string) => {
     strength: 'Unknown',
     pair: 'Not identified'
   };
+};
+
+// Identify conjugate acid-base pairs from a full reaction
+export const identifyConjugatePairsInReaction = (equation: string) => {
+  const normalize = (f: string) => {
+    const subMap: Record<string, string> = { '₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9' };
+    let s = f.replace(/\s+/g, '');
+    s = s.replace(/[₀-₉]/g, (ch) => subMap[ch] || ch);
+    s = s.replace(/\((aq|s|l|g)\)/gi, '');
+    s = s.replace(/[⁺⁻]/g, '');
+    s = s.replace(/[+-]$/g, '');
+    return s;
+  };
+
+  const toCounts = (formula: string) => {
+    const counts: Record<string, number> = {};
+    const re = /([A-Z][a-z]?)(\d*)/g;
+    let m: RegExpExecArray | null;
+    const f = normalize(formula);
+    while ((m = re.exec(f)) !== null) {
+      const el = m[1];
+      const c = m[2] ? parseInt(m[2]) : 1;
+      counts[el] = (counts[el] || 0) + c;
+    }
+    return counts;
+  };
+
+  const sameNonHydrogen = (a: Record<string, number>, b: Record<string, number>) => {
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)].filter(k => k !== 'H'));
+    for (const k of keys) {
+      if ((a[k] || 0) !== (b[k] || 0)) return false;
+    }
+    return true;
+  };
+
+  const cleanEq = equation.replace(/=/g, '→');
+  const parts = cleanEq.split(/→|->/);
+  if (parts.length < 2) return { pairs: [] };
+
+  const parseSide = (side: string) => side.split('+').map(s => s.trim()).filter(Boolean).map(s => s.replace(/^(\d+)\s*/, ''));
+
+  const left = parseSide(parts[0]);
+  const right = parseSide(parts[1]);
+
+  const commonAcids: Record<string, { conjugateBase: string; strength: string }> = {
+    'HCl': { conjugateBase: 'Cl⁻', strength: 'Strong acid' },
+    'HBr': { conjugateBase: 'Br⁻', strength: 'Strong acid' },
+    'HI': { conjugateBase: 'I⁻', strength: 'Strong acid' },
+    'HNO₃': { conjugateBase: 'NO₃⁻', strength: 'Strong acid' },
+    'H₂SO₄': { conjugateBase: 'HSO₄⁻', strength: 'Strong acid' },
+    'HClO₄': { conjugateBase: 'ClO₄⁻', strength: 'Strong acid' },
+    'CH₃COOH': { conjugateBase: 'CH₃COO⁻', strength: 'Weak acid' },
+    'HF': { conjugateBase: 'F⁻', strength: 'Weak acid' },
+    'NH₄⁺': { conjugateBase: 'NH₃', strength: 'Weak acid' },
+    'H₃O⁺': { conjugateBase: 'H₂O', strength: 'Strong acid' }
+  };
+  const commonBases: Record<string, { conjugateAcid: string; strength: string }> = {
+    'OH⁻': { conjugateAcid: 'H₂O', strength: 'Strong base' },
+    'NH₃': { conjugateAcid: 'NH₄⁺', strength: 'Weak base' },
+    'CH₃COO⁻': { conjugateAcid: 'CH₃COOH', strength: 'Weak base' },
+    'F⁻': { conjugateAcid: 'HF', strength: 'Weak base' },
+    'Cl⁻': { conjugateAcid: 'HCl', strength: 'Very weak base' },
+    'H₂O': { conjugateAcid: 'H₃O⁺', strength: 'Very weak base' }
+  };
+
+  const pairs: { type: 'acid' | 'base'; reactant: string; conjugate: string; pair: string; strength?: string }[] = [];
+
+  left.forEach(L => {
+    const cL = toCounts(L);
+    right.forEach(R => {
+      const cR = toCounts(R);
+      if (!sameNonHydrogen(cL, cR)) return;
+      const dH = (cR['H'] || 0) - (cL['H'] || 0);
+      if (dH === -1) {
+        // L lost H -> acid
+        pairs.push({
+          type: 'acid',
+          reactant: L,
+          conjugate: R,
+          pair: `${L} / ${R}`,
+          strength: commonAcids[L]?.strength
+        });
+      } else if (dH === 1) {
+        // L gained H -> base
+        pairs.push({
+          type: 'base',
+          reactant: L,
+          conjugate: R,
+          pair: `${R} / ${L}`,
+          strength: commonBases[L]?.strength
+        });
+      }
+    });
+  });
+
+  // Deduplicate pairs
+  const key = (p: any) => `${p.type}-${p.reactant}-${p.conjugate}`;
+  const unique = Object.values(pairs.reduce((acc: any, p) => { acc[key(p)] = p; return acc; }, {}));
+
+  return { pairs: unique };
 };
 
 // Enhanced pH determination
