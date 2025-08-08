@@ -32,7 +32,7 @@ const Index = () => {
     { value: 'conjugate', label: 'Conjugate Pairs' },
     { value: 'ph-determiner', label: 'Substance pH Test' },
     { value: 'reactant-gen', label: 'Reactant Generator' },
-    { value: 'stoichiometry', label: 'Limiting Reagent' },
+    { value: 'stoichiometry', label: 'Stoichiometry'},
     { value: 'molarmass', label: 'Molar Mass' },
     { value: 'converter', label: 'Unit Converter' },
     { value: 'concentration', label: 'Concentration' },
