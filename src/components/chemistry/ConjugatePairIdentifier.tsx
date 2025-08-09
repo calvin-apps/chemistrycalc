@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeftRight, Lightbulb } from 'lucide-react';
 import { identifyConjugatePairs, identifyConjugatePairsInReaction } from '@/utils/chemistryCalculations';
+import ChemicalSymbolInserter from "@/components/chemistry/ChemicalSymbolInserter";
 
 const ConjugatePairIdentifier = () => {
   const [compound, setCompound] = useState('');
@@ -63,6 +64,7 @@ const ConjugatePairIdentifier = () => {
               placeholder="Enter compound or reaction (e.g., HCl, NH₃, or HCl + H2O -> H3O+ + Cl-)"
               className="flex-1"
             />
+            <ChemicalSymbolInserter onSymbolInsert={(symbol) => setCompound((prev) => prev + symbol)} />
             <Button onClick={handleIdentify} className="bg-blue-600 hover:bg-blue-700 text-white">
               Identify
             </Button>
