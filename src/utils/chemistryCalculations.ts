@@ -10,6 +10,79 @@ const ATOMIC_MASSES: { [key: string]: number } = {
   In: 114.818, Sn: 118.71, Sb: 121.76, Te: 127.6, I: 126.904, Xe: 131.293, Cs: 132.905, Ba: 137.327
 };
 
+// Normalize chemical formula symbols: convert Unicode subscripts/superscripts, strip charges and states
+const normalizeFormulaSymbols = (input: string): string => {
+  const subMap: Record<string, string> = { '₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9' };
+  const supMap: Record<string, string> = { '⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9' };
+  let s = (input || '').toString();
+  s = s.replace(/\s+/g, '');
+  s = s.replace(/·/g, ''); // remove hydrate dot (treated as concatenation)
+  s = s.replace(/\((aq|s|l|g)\)/gi, '');
+  // Normalize unicode signs and digits
+  s = s.replace(/[₀-₉]/g, (ch) => subMap[ch] || ch);
+  s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (ch) => supMap[ch] || '');
+  s = s.replace(/−/g, '-').replace(/⁻/g, '-').replace(/⁺/g, '+');
+  // Strip trailing charge notations: ^2-, 2-, +, superscripts, etc.
+  s = s.replace(/\^?\d*[+\-]$/,'');
+  s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]*[⁺⁻]$/,'');
+  s = s.replace(/[+\-]$/,'');
+  return s;
+};
+
+// Parse normalized formula into element counts, handling parentheses
+const parseToCounts = (formula: string): Record<string, number> => {
+  const f = normalizeFormulaSymbols(formula);
+  const stack: Array<Map<string, number>> = [new Map()];
+  let i = 0;
+  const n = f.length;
+
+  const isDigit = (ch: string) => ch >= '0' && ch <= '9';
+  const isLower = (ch: string) => ch >= 'a' && ch <= 'z';
+  const isUpper = (ch: string) => ch >= 'A' && ch <= 'Z';
+
+  const parseNumber = (): number => {
+    if (i >= n || !isDigit(f[i])) return 1;
+    let val = 0;
+    while (i < n && isDigit(f[i])) { val = val * 10 + (f.charCodeAt(i) - 48); i++; }
+    return val || 1;
+  };
+
+  const parseElement = (): string | null => {
+    if (i >= n || !isUpper(f[i])) return null;
+    let el = f[i++];
+    if (i < n && isLower(f[i])) el += f[i++];
+    return el;
+  };
+
+  const add = (map: Map<string, number>, el: string, cnt: number) => {
+    map.set(el, (map.get(el) || 0) + cnt);
+  };
+
+  while (i < n) {
+    const ch = f[i];
+    if (ch === '(') {
+      i++; stack.push(new Map());
+    } else if (ch === ')') {
+      i++; const mult = parseNumber();
+      const grp = stack.pop()!;
+      const top = stack[stack.length - 1];
+      for (const [el, cnt] of grp) add(top, el, cnt * mult);
+    } else {
+      const el = parseElement();
+      if (el) {
+        const cnt = parseNumber();
+        add(stack[stack.length - 1], el, cnt);
+      } else {
+        // Skip any non-parsed character gracefully
+        i++;
+      }
+    }
+  }
+
+  const out: Record<string, number> = {};
+  for (const [el, cnt] of stack[0]) out[el] = cnt;
+  return out;
+};
 export const balanceEquation = (equation: string) => {
   // Simplified equation balancing - in a real app, this would use a matrix algebra approach
   const cleanEquation = equation.replace(/\s/g, '').replace(/=/g, '→');
@@ -77,20 +150,15 @@ export const identifyReactionType = (equation: string) => {
 };
 
 export const calculateMolarMass = (formula: string) => {
-  const elementRegex = /([A-Z][a-z]?)(\d*)/g;
-  let match;
+  const counts = parseToCounts(formula);
   const breakdown: { [key: string]: { count: number; atomicMass: number } } = {};
   let totalMass = 0;
 
-  while ((match = elementRegex.exec(formula)) !== null) {
-    const element = match[1];
-    const count = parseInt(match[2]) || 1;
+  for (const [element, count] of Object.entries(counts)) {
     const atomicMass = ATOMIC_MASSES[element];
-    
     if (!atomicMass) {
       throw new Error(`Unknown element: ${element}`);
     }
-    
     breakdown[element] = { count, atomicMass };
     totalMass += atomicMass * count;
   }
@@ -104,16 +172,7 @@ export const calculateMolarMass = (formula: string) => {
 
 export const calculateStoichiometry = (equation: string, masses: { [key: string]: number }) => {
   try {
-    const normalizeFormula = (f: string) => {
-      // Normalize subscripts and remove charges/states/spaces
-      const subMap: Record<string, string> = { '₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9' };
-      let s = f.replace(/\s+/g, '');
-      s = s.replace(/[₀-₉]/g, (ch) => subMap[ch] || ch);
-      s = s.replace(/\((aq|s|l|g)\)/gi, '');
-      s = s.replace(/[⁺⁻]/g, '');
-      s = s.replace(/[+-]$/g, '');
-      return s;
-    };
+    const normalizeFormula = (f: string) => normalizeFormulaSymbols(f);
 
     const cleanEq = equation.replace(/=/g, '→');
     const arrowParts = cleanEq.split(/→|->/);
